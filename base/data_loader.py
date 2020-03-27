@@ -51,6 +51,7 @@ class VideoRecord(object):
 Class Name: TSNDataSet
 Description: It's used to load video data from file system according to meta file of dataset.
 '''
+
 class TSNDataSet(data.Dataset):
     def __init__(self, video_path=None,
                 dataset_type=None,

@@ -80,22 +80,38 @@ bash ./run_demo_m.sh
 ```
 ## Experiment Show of DLAC
 
-| TOP1   | Training Time | Parallel Method | Loader Method | Backbone    | Segments | Model | Modality | Dataset | BatchSize | LR    | Steps   | Epochs | GPUs |
-| ------ | ------------- | --------------- | ------------- | ----------- | -------- | ----- | -------- | ------- | --------- | ----- | ------- | ------ | :--- |
-| 54.379 | 32.462min     | DP              | DataLoaderX   | resnet50    | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 53.529 | 30.210min     | DP              | DPFlow        | resnet50    | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 53.987 | 27.115min     | DP              | SuperLoader   | resnet50    | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 52.735 | 28.485min     | DDP             | DataLoaderX   | resnet50    | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 52.81  | 20.045min     | DDP             | SuperLoader   | resnet50    | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-|        |               |                 |               |             |          |       |          |         |           |       |         |        |      |
-| 53.399 | 21.995min     | DP              | SuperLoader   | BNInception | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 55.098 | 28.009min     | DP              | DataLoaderX   | BNInception | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 54.052 | 25.776min     | DP              | DPFlow        | BNInception | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 53.725 | 17.050min     | DDP             | SuperLoader   | BNInception | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
-| 52.941 | 23.272min     | DDP             | DataLoaderX   | BNInception | 5        | TSN   | RGB      | HMDB51  | 64        | 0.001 | [20,40] | 60     | 8    |
+| TOP1   | Training Time | Parallel Method | Loader Method | Backbone    | Segments | Model                 | Modality | Dataset             | BatchSize | LR    | Steps      | Epochs | GPUs |
+| ------ | ------------- | --------------- | ------------- | ----------- | -------- | --------------------- | -------- | ------------------- | --------- | ----- | ---------- | ------ | ---- |
+| 54.379 | 32.462min     | DP              | DataLoaderX   | resnet50    | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 53.529 | 30.210min     | DP              | DPFlow        | resnet50    | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 53.987 | 27.115min     | DP              | SuperLoader   | resnet50    | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 52.735 | 28.485min     | DDP             | DataLoaderX   | resnet50    | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 52.81  | 20.045min     | DDP             | SuperLoader   | resnet50    | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 53.399 | 21.995min     | DP              | SuperLoader   | BNInception | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 55.098 | 28.009min     | DP              | DataLoaderX   | BNInception | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 54.052 | 25.776min     | DP              | DPFlow        | BNInception | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 53.725 | 17.050min     | DDP             | SuperLoader   | BNInception | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+| 52.941 | 23.272min     | DDP             | DataLoaderX   | BNInception | 5        | TSN                   | RGB      | HMDB51              | 64        | 0.001 | [20,40]    | 60     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 85.223 | 65.637min     | DP              | DataLoaderX   | BNInception | 5        | TSN                   | RGB      | UCF101              | 64        | 0.001 | [20,40]    | 60     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 70.692 | 134.872min    | DP              | DataLoaderX   | BNInception | 5        | TSN                   | RGB      | ActivityNet Trimmed | 64        | 0.001 | [20,40]    | 60     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 68.372 | 7d16h         | DP              | DataLoaderX   | BNInception | 5        | TSN                   | RGB      | K600                | 64        | 0.001 | [20,50,80] | 120    | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 65.805 | 9d            | DP              | DataLoaderX   | resnet50    | 8        | I3D(Dense_Sample)     | RGB      | K600                | 64        | 0.01  | [20,50,80] | 120    | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 32.91  | 10d           | DP              | DataLoaderX   | BNInception | 16       | TSN                   | RGB      | SomethingV2         | 64        | 0.001 | [20,40,60] | 80     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+| 48.509 | 9d            | DP              | DataLoaderX   | mfnet2d     | 16       | MFNet3D(Dense_Sample) | RGB      | SomethingV2         | 64        | 0.01  | [20,40,60] | 80     | 8    |
+|        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
+|        |               | DP              | DataLoaderX   | resnet50    | 32       | SlowFast              | RGB      | K600                | 32        | 0.01  | [20,50,80] | 120    | 8    |
 
 ## Tools
+
 ./base_workspace.sh is used to install some tools that serves you.
 ## Reference
 The whole framework assembles some famous models. Thank you very much for these creators. These original code of model are from the following URL:
-1)
+1) http://yjxiong.me/others/tsn/
+2) https://github.com/cypw/PyTorch-MFNet
