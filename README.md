@@ -51,7 +51,7 @@ bash ./run_train_ddp_m.sh  -n 1 -g Your GPUs -c 12 # If you use distributed trai
 ```
 #### 4. Download Pretrain Model
 In this part, you can download some pretrain models from URL:
-BaiduYun Disk :https://pan.baidu.com/s/15zvdVLi9jbJ08W7Q7nSuSQ  Password: dpzy
+BaiduYun Disk :https://pan.baidu.com/s/1rGhuHVF2qDrCoJmLGFB6dA   Password: 1l3w
 Then put them into /your root path/ar_output/pretrain_model_zoo/.
 
 #### 5. Train Model
