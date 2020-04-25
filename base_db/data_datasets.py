@@ -17,12 +17,6 @@ import torch.utils.data as data
 from transform import *
 from config import ActivityConfig as cfg
 ## DPFlow
-if cfg.REDIS_MODE:
-    import redis            ## Megvii
-    import nori2 as nori    ## Megvii
-import redis            ## Megvii
-import nori2 as nori    ## Megvii
-
 '''
 Class Name: VideoRecord
 Description: It's used to record video instance(item) info,such as seq_path,seq_len,seq_id_label

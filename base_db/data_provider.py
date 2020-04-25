@@ -13,9 +13,7 @@ from utils import GenerateDPFlowAddr,PipeOutput
 from data  import train_provider_remote
 
 ## DPFlow
-if cfg.REDIS_MODE:
-    from dpflow import control, OutputPipe
-from dpflow import control, OutputPipe
+
 '''
 Class Name: IndexSampler
 Description: It's used to product index set of a batch randomly

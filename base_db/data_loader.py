@@ -15,10 +15,7 @@ from multiprocessing import Process, Queue,Lock
 ## self define file
 from config import ActivityConfig as cfg
 from utils import PipeInput
-## DPFlow
-if cfg.REDIS_MODE:
-    from dpflow import control,InputPipe ##Megvii
-from dpflow import control,InputPipe ##Megvii
+
 ## TODO: DataLoaderX
 '''
 Class Name: DataLoaderX
