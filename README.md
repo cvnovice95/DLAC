@@ -106,7 +106,7 @@ bash ./run_demo_m.sh
 |        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
 | 48.509 | 9d            | DP              | DataLoaderX   | mfnet2d     | 16       | MFNet3D(Dense_Sample) | RGB      | SomethingV2         | 64        | 0.01  | [20,40,60] | 80     | 8    |
 |        |               |                 |               |             |          |                       |          |                     |           |       |            |        |      |
-|        |               | DP              | DataLoaderX   | resnet50    | 32       | SlowFast              | RGB      | K600                | 32        | 0.01  | [20,50,80] | 120    | 8    |
+| 70.2   | 9d            | DP              | DataLoaderX   | resnet50    | 32       | SlowFast              | RGB      | K600                | 32        | 0.01  | [20,50,80] | 120    | 8    |
 
 ## Tools
 
