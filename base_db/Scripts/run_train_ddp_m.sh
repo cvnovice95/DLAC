@@ -27,8 +27,6 @@ export NCCL_IB_HCA
 cd ..
 for((rank=0;rank < $num_nodes;rank++));
 do
-    rlaunch --cpu=$cpu_per_node --gpu=$gpu_per_node --memory=$((1024*80)) --max-wait-time=1h \
-    --charged-group=research_video --priority=Medium --rand-hostname -- \
     python3 -m torch.distributed.launch --nproc_per_node=$gpu_per_node \
     --nnodes=$num_nodes --node_rank=$rank --master_port=12345 \
         train.py \
