@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "train.py", line 465, in <module>
+    main()
+  File "train.py", line 49, in main
+    torch.cuda.set_device(cfg.local_rank)
+  File "/mnt/lustre/fengjinyuan/.conda/envs/my_r0.3.0/lib/python3.6/site-packages/torch/cuda/__init__.py", line 262, in set_device
+    device = _get_device_index(device)
+  File "/mnt/lustre/fengjinyuan/.conda/envs/my_r0.3.0/lib/python3.6/site-packages/torch/cuda/_utils.py", line 31, in _get_device_index
+    'an integer, but got: '.format(device))
+ValueError: Expected a cuda device with sepecified index or an integer, but got: 
+srun: error: SH-IDC1-10-5-31-9: task 0: Exited with exit code 1
