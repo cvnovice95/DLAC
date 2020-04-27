@@ -540,7 +540,7 @@ class DPFlowUntrimmedDataset(DPFlowDataset):
         return self.video_num
 
 ## TODO: HumanactionDataset
-import meghair.utils.io as io
+
 '''
 Class Name: HumanactionDataset
 '''
