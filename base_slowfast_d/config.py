@@ -1,6 +1,7 @@
 import os
 import time
 from easydict import EasyDict as edict
+import yaml
 
 __C = edict()
 ActivityConfig = __C
@@ -17,9 +18,9 @@ __C.KEEP_HISTORY = True            # 1 keep 0 remove | if this flag be marked Tr
 __C.DEBUG_MODE = False             # 1 debug mode 0 normal | if this flag be marked True, framework will save log into debug[dir]
 ## Experiment Setting
 __C.EXP_TYPE = 'T'                 # TODO: the type of experiment,['T','E')
-__C.MODEL_NAME = 'slowfast'             # TODO: the model name of experiment,['tsn','i3d','slowfast','tsm']
+__C.MODEL_NAME = 'tsn'             # TODO: the model name of experiment,['tsn','i3d','slowfast','tsm']
 __C.MODEL_LIST = ['tsn','i3d','slowfast','tsm','mfnet3d']
-__C.EXP_TAG = 'k400_res50_RGB'     # TODO: the flag of experiment
+__C.EXP_TAG = 'k400_res50_RGB_d'     # TODO: the flag of experiment
 __C.BACKBONE = 'resnet50'       # TODO: backbone network ['BNInception','mobilenetv2','resnet50','mfnet2d','inceptionv3']
 __C.PRETRAIN_TYPE = 'imagenet'     # backbone pretrain type ['imagenet','kinetics',None]
 __C.PRETRAIN_TYPE_LIST = ['imagenet','kinetics']
@@ -47,34 +48,41 @@ __C.DATASET.NAME = ""     # The name of Dataset
 __C.DATASET.CLASS_NUM = 400      # TODO: CLASS_NUM
 __C.DATASET.IMG_FORMART = 'frame{}.jpg'
 __C.DATASET.VIDEO_SEQ_PATH = ''#os.path.join(__C.DATASET.ROOT_PATH,__C.DATASET.NAME,'VideoSeq')
-__C.DATASET.TRAIN_META_PATH = '/mnt/lustre/fengjinyuan/data/datasets/k400/k400_rgb_train.csv'  #os.path.join(__C.DATASET.ROOT_PATH,__C.DATASET.NAME,'MetafileSeq','train_split1.csv')
-__C.DATASET.VAL_META_PATH = '/mnt/lustre/fengjinyuan/data/datasets/k400/k400_rgb_val.csv' #os.path.join(__C.DATASET.ROOT_PATH,__C.DATASET.NAME,'MetafileSeq','val_split1.csv')
+__C.DATASET.TRAIN_META_PATH = '/mnt/lustre/fengjinyuan/data/datasets/k400_label/k400_rgb_train.csv'  #os.path.join(__C.DATASET.ROOT_PATH,__C.DATASET.NAME,'MetafileSeq','train_split1.csv')
+__C.DATASET.VAL_META_PATH = '/mnt/lustre/fengjinyuan/data/datasets/k400_label/k400_rgb_val.csv' #os.path.join(__C.DATASET.ROOT_PATH,__C.DATASET.NAME,'MetafileSeq','val_split1.csv')
 __C.DATASET.TRAIN_SAMPLE_METHOD = 'seg_random'
 __C.DATASET.VAL_SAMPLE_METHOD = 'seg_ratio'
-__C.DATASET.LOAD_METHOD = 'TSNDataSet'
+__C.DATASET.LOAD_METHOD = 'TSNDataSet_Memcache'
 __C.DATASET.LOAD_METHOD_LIST = ['TSNDataSet',
+                                'TSNDataSet_Memcache',
                                 'DPFlowDataset',
                                 'HumanactionDataset',
                                 'DPFlowUntrimmedDataset']
 ## Training Configuration
 __C.TRAIN = edict()
+## Sensetime
+__C.TRAIN.WARMUP_ITERATION = 10000
+__C.TRAIN.PERIOD_ITERATION = 100000
+__C.TRAIN.MAX_ITERATION = 110000
+__C.TRAIN.LR_STEPS_ITERATION = [40000,80000,100000]
+
 __C.TRAIN.EPOCHS = 50            # The number of Epoch
 __C.TRAIN.BASE_BATCH_SIZE = 64    # TODO: BASE_BATCH_SIZE
-__C.TRAIN.BATCH_SIZE = __C.TRAIN.BASE_BATCH_SIZE//__C.GPUS if __C.USE_DISTRIBUTED else __C.TRAIN.BASE_BATCH_SIZE   # mini batch size
-__C.TRAIN.BASE_LR = 0.02        # The base learning rate of the whole training
-__C.TRAIN.LR_STEP_TYPE = 'sgdr'  # The policy of learning rate, ['step','sgdr']
+__C.TRAIN.BATCH_SIZE = 8 #__C.TRAIN.BASE_BATCH_SIZE//__C.GPUS if __C.USE_DISTRIBUTED else __C.TRAIN.BASE_BATCH_SIZE   # mini batch size
+__C.TRAIN.BASE_LR = 0.001      # The base learning rate of the whole training
+__C.TRAIN.LR_STEP_TYPE = 'step'  # The policy of learning rate, ['step','sgdr']
 __C.TRAIN.LR_STEPS =[20,40,60]      # If LR_SETP_TYPE = 'step', the change step of the learning rate
 __C.TRAIN.PERIOD_EPOCH = 20      # To set period params in SGDR
 __C.TRAIN.WARMUP_EPOCH = 10      # To set warmup params in SGDR
 __C.TRAIN.MOMENTUM = 0.9         # To set momentum params
 __C.TRAIN.WEIGHT_DECAY = 5e-4    # To set weight decay params
 __C.TRAIN.CLIP_GRADIENT = 20     # To set clip gradient threshold
-__C.TRAIN.PRINT_FREQ = 4         # To set log.info print frequency
-__C.TRAIN.EVALUATE_FREQ = 5      # To set save checkpoint frequency
+__C.TRAIN.PRINT_FREQ = 10       # To set log.info print frequency
+__C.TRAIN.EVALUATE_FREQ = 2000   # To set save checkpoint frequency
 __C.TRAIN.START_EPOCH = 0        # To set start epoch
 __C.TRAIN.BEST_PREC = 0.0        # To set global best top1 in training
 __C.TRAIN.DROPOUT = 0.8          # To set dropout
-__C.TRAIN.SEG_NUM = 32            # TODO: set seg num in TSN sampler policy
+__C.TRAIN.SEG_NUM = 8          # TODO: set seg num in TSN sampler policy
 __C.TRAIN.CROP_NUM = 1
 __C.TRAIN.MODALITY = 'RGB'       # To set data modality
 __C.TRAIN.PARTIAL_BN = True      # To set partial bn in TSN
@@ -84,9 +92,9 @@ __C.TRAIN.SHIFT_DIV = 8          # To set shift ratio of channel in TSM
 __C.TRAIN.SHIFT_PLACE = 'block' if __C.MODEL_NAME == 'tsm' and __C.BACKBONE == 'BNInception' else 'blockres'
 ## Validation Configuration
 __C.VAL = edict()
-__C.VAL.BATCH_SIZE = 1           # To set batch size in evaluate
-__C.VAL.PRINT_FREQ = 1           # To set log.info print frequency
-__C.VAL.SEG_NUM = 32             # TODO: set seg num in evaluate
+__C.VAL.BATCH_SIZE = 8          # To set batch size in evaluate
+__C.VAL.PRINT_FREQ = 10           # To set log.info print frequency
+__C.VAL.SEG_NUM = 8           # TODO: set seg num in evaluate
 __C.VAL.CROP_NUM = 1
 __C.VAL.MODALITY = 'RGB'         # To set data modality in evaluate
 ## The info of input's image
@@ -98,6 +106,11 @@ __C.IMG.STD = 0
 ## PRETRAIN_MODEL_DICT URL:
 __C.PRETRAIN_MODEL_DICT = {
     'tsn':{
+        'stm50': {
+            'imagenet': 'resnet50-19c8e357.pth',
+            'resume': '',
+            'finetune': ''
+        },
         'BNInception':{
             'imagenet':'bn_inception-52deb4733.pth',
             'resume':'',
@@ -105,7 +118,7 @@ __C.PRETRAIN_MODEL_DICT = {
         },
         'resnet50':{
             'imagenet':'resnet50-19c8e357.pth',
-            'resume':'',
+	    'resume':'2020_05_07_09:18:40_epoch_48000_NONE_D.pth.tar',
             'finetune': ''
         },
         'inceptionv3':{
@@ -185,6 +198,9 @@ __C.HUMANACTION_LABEL_LIST = [
     'static_action_watch_phone',
     # 'unclear'
 ]
+
+
+
 
 
 

@@ -76,6 +76,8 @@ def main():
                 cfg.SNAPSHOT_CHECKPOINT = os.path.join(cfg.SNAPSHOT_ROOT, 'ar_output', cfg.EXP_NAME, 'checkpoint')
                 cfg.SNAPSHOT_SUMMARY = os.path.join(cfg.SNAPSHOT_ROOT, 'ar_output', cfg.EXP_NAME, 'summary')
                 cfg.SNAPSHOT_CONFIG = os.path.join(cfg.SNAPSHOT_ROOT, 'ar_output', cfg.EXP_NAME, 'config')
+                cfg.DATASET.VAL_META_PATH = '/mnt/lustre/fengjinyuan/data/datasets/k400_label/k400_rgb_val.csv'
+                cfg.VAL.BATCH_SIZE  = 1
                 _io = IO()
                 _io.check_folder()
                 ## check GPU info

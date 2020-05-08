@@ -5,10 +5,10 @@ from torch.utils.data import DataLoader
 from multiprocessing.managers import BaseManager
 import torchvision.transforms as torch_transforms
 ## self-define file
-from data_datasets import DPFlowDataset,TSNDataSet,HumanactionDataset,DPFlowUntrimmedDataset
+from data_datasets import DPFlowDataset,TSNDataSet,HumanactionDataset,DPFlowUntrimmedDataset,TSNDataSet_Memcache
 from data_loader import DataLoaderX,SuperDataLoader,DPFlowDataLoaderDP,PipeDataLoaderDP
 from config import ActivityConfig as cfg
-from utils import GenerateDPFlowAddr,AverageMeter
+from utils import GenerateDPFlowAddr,AverageMeter,DistributedGivenIterationSampler,DistributedSampler
 from transform import *
 
 
@@ -70,6 +70,17 @@ def train_base(transform=None):
                              modality=cfg.TRAIN.MODALITY,
                              img_format=cfg.DATASET.IMG_FORMART)
         return dataset
+    elif cfg.DATASET.LOAD_METHOD == 'TSNDataSet_Memcache':
+        dataset = TSNDataSet_Memcache(video_path=cfg.DATASET.VIDEO_SEQ_PATH,
+                             dataset_type='video',
+                             meta_file_name=cfg.DATASET.TRAIN_META_PATH,
+                             sample_method=cfg.DATASET.TRAIN_SAMPLE_METHOD,
+                             seg_num_ext=cfg.TRAIN.SEG_NUM,
+                             mode='train',
+                             transform=transform,
+                             modality=cfg.TRAIN.MODALITY,
+                             img_format=cfg.DATASET.IMG_FORMART)
+        return dataset
     elif cfg.DATASET.LOAD_METHOD == 'HumanactionDataset':
         dataset = HumanactionDataset(pkl_root_path=cfg.HUMANACTION_PKL_ROOT_PATH,
                                     pkl_name=cfg.HUMANACTION_TRAIN_PKL_NAME,
@@ -107,7 +118,17 @@ def val_base(transform=None):
                              modality=cfg.VAL.MODALITY,
                              img_format=cfg.DATASET.IMG_FORMART)
         return dataset
-
+    elif cfg.DATASET.LOAD_METHOD == 'TSNDataSet_Memcache':
+        dataset = TSNDataSet_Memcache(video_path=cfg.DATASET.VIDEO_SEQ_PATH,
+                             dataset_type='video',
+                             meta_file_name=cfg.DATASET.VAL_META_PATH,
+                             sample_method=cfg.DATASET.VAL_SAMPLE_METHOD,
+                             seg_num_ext=cfg.VAL.SEG_NUM,
+                             mode='val',
+                             transform=transform,
+                             modality=cfg.VAL.MODALITY,
+                             img_format=cfg.DATASET.IMG_FORMART)
+        return dataset
     elif cfg.DATASET.LOAD_METHOD == 'HumanactionDataset':
         dataset = HumanactionDataset(pkl_root_path=cfg.HUMANACTION_PKL_ROOT_PATH,
                                      pkl_name=cfg.HUMANACTION_VAL_PKL_NAME,
@@ -128,6 +149,37 @@ def val_base(transform=None):
         print("=> Invaild Load Method!!![{}].Support Load Method has:{}".format(cfg.DATASET.LOAD_METHOD,
                                                                                 cfg.DATASET.LOAD_METHOD_LIST))
         sys.exit(0)
+def train_loader_local_st(transform=None):
+    dataset = train_base(transform=transform)
+    if cfg.USE_DISTRIBUTED:
+        # train_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+        train_sampler = DistributedGivenIterationSampler(
+            dataset, cfg.TRAIN.MAX_ITERATION,cfg.TRAIN.BATCH_SIZE,
+            last_iter=cfg.TRAIN.START_EPOCH-1)
+        loader = DataLoader(dataset,
+                             batch_size=cfg.TRAIN.BATCH_SIZE,
+                             num_workers=20,
+                             pin_memory=False,
+                             sampler=train_sampler)
+        if cfg.SUPER_LOADER:
+            print("=> Using SuperLoader!!!!!")
+            loader = SuperDataLoader(loader, 4, num_workers=1)
+        return loader, dataset.count_video(), train_sampler
+
+def val_loader_local_st(transform=None):
+    dataset = val_base(transform=transform)
+    if cfg.USE_DISTRIBUTED:
+        # train_sampler = torch.utils.data.distributed.DistributedSampler(dataset)
+        val_sampler = DistributedSampler(dataset, round_up=False)
+        loader = DataLoader  (dataset,
+                             batch_size=cfg.VAL.BATCH_SIZE,
+                             num_workers=20,
+                             pin_memory=False,
+                             sampler=val_sampler)
+        if cfg.SUPER_LOADER:
+            print("=> Using SuperLoader!!!!!")
+            loader = SuperDataLoader(loader, 4, num_workers=1)
+        return loader, dataset.count_video(), val_sampler
 
 def train_loader_local(transform=None):
     dataset = train_base(transform=transform)

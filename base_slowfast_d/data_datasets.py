@@ -1,6 +1,7 @@
 '''
 Description: This file is used to load video from file system.
 '''
+import io
 import os
 import sys
 import time
@@ -113,6 +114,233 @@ class TSNDataSet(data.Dataset):
         if self.modality == 'RGB' or self.modality == 'RGBDiff':
 
             return [Image.open(os.path.join(img_path, self.img_format.format(idx))).convert('RGB')]
+        elif self.modality == 'Flow':
+            x_img = Image.open(os.path.join(img_path, self.img_format.format('x', idx))).convert('L')
+            y_img = Image.open(os.path.join(img_path, self.img_format.format('y', idx))).convert('L')
+            return [x_img, y_img]
+
+    def _param_check(self):
+        if self.video_path is None:
+            raise ValueError("video_path is None")
+        if not (self.dataset_type in ['video', 'image']):
+            raise ValueError("dataset_type occurs error,dataset_type should be ['video','image']")
+        if not (self.sample_method in ['seg_random', 'seg_ratio', 'seg_seg']):
+            raise ValueError("just support sample method in ['seg_random','seg_ratio','seg_seg'] ")
+        if not (self.mode in ['train', 'val', 'test']):
+            raise ValueError("just support mode in ['train','val','test']")
+        if self.meta_file_name is None:
+            raise ValueError("meta_file_name is None")
+        if self.seg_num_ext is None:
+            raise ValueError("seg_num_ext is None")
+        (_, ext) = os.path.splitext(self.meta_file_name)
+        if not (ext in ['.pkl', '.csv']):
+            raise ValueError("meta_file_name is not ['.pkl','.csv'] file")
+
+    def _parse_meta_file(self):
+        meta_file_path = self.meta_file_name
+        (_, ext) = os.path.splitext(self.meta_file_name)
+        if self.dataset_type == 'video':
+            if ext == '.csv':
+                self.item_list = [VideoRecord(x.strip().split(',')) for x in open(meta_file_path)]
+                print("=> load %s number of videos is %d"%(self.mode,len(self.item_list)))
+
+    def _seg_random_sampler(self, seq_len, seg_num, s):
+        '''
+        :param seq_len: The length of a video
+        :param seg_num:  The video is divided seg_num segments
+        :param s: The index of the first frame from videos
+        :return: The list contains index set
+        '''
+        if seq_len < seg_num:
+            index = []
+            cycle_len = seg_num // seq_len
+            for i in range(cycle_len):
+                index.extend([s + i for i in range(seq_len)])
+            tail_index = [s + i for i in range(seg_num - len(index))]
+            index.extend(tail_index)
+            return index
+            # raise ValueError("seq_len<seg_num", seq_len, seg_num)
+        seg_len = seq_len // seg_num
+        index = [s + i * seg_len + random.randint(0, seg_len - 1) for i in range(seg_num)]
+        return index
+
+    def _seg_ratio_sampler(self, seq_len, seg_num, s, ratio):
+        '''
+        :param seq_len: The length of a video
+        :param seg_num:  The video is divided seg_num segments
+        :param s: The index of the first frame from videos
+        :param ratio: None
+        :return: The list contains index set
+        '''
+        if seq_len < seg_num:
+            index = []
+            cycle_len = seg_num // seq_len
+            for i in range(cycle_len):
+                index.extend([s + i for i in range(seq_len)])
+            tail_index = [s + i for i in range(seg_num - len(index))]
+            index.extend(tail_index)
+            return index
+            # raise ValueError("seq_len<seg_num", seq_len, seg_num)
+        if not (ratio >= 0.0 and ratio <= 1.0):
+            raise ValueError("0<=ratio<=1", ratio)
+        seg_len = seq_len // seg_num
+        index = [s + i * seg_len + int((seg_len - 1) * ratio) for i in range(seg_num)]
+        return index
+
+    def _seg_seg_sampler(self, seq_len, seg_num_ext, seg_num_inner, func=None, sampler_type=None, ratio=0.5):
+        if seq_len < seg_num_ext:
+            raise ValueError("seq_len<seg_num", seq_len, seg_num_ext)
+        seg_len_ext = seq_len // seg_num_ext
+        if seg_len_ext < seg_num_inner:
+            raise ValueError("seg_len_ext<seg_num_inner", seg_len_ext, seg_num_inner)
+        if func is None:
+            raise ValueError("No define single sampler,func is None")
+        if not (sampler_type in ['rand', 'ratio']):
+            raise ValueError("No define sampler_type or sampler_type,type is error")
+        index = []
+        for i in range(seg_num_ext):
+            s = i * seg_len_ext
+            if sampler_type == 'rand':
+                index += func(seg_len_ext, seg_num_inner, s)
+            if sampler_type == 'ratio':
+                index += func(seg_len_ext, seg_num_inner, s, ratio)
+        return index
+
+    def _dense_random_sampler(self,seq_len, frames, clip_len, s):
+        if seq_len < frames:
+            index = [i for i in range(seq_len)] + [seq_len - 1 for i in range(frames - seq_len)]
+            return [s + i for i in index]
+        if frames <= seq_len <= clip_len:
+            index = [i for i in range(seq_len)]
+            return [s + i for i in index][::(seq_len // frames)][:frames]
+        s = random.randint(0, (seq_len - clip_len) - 1)
+        index = [i for i in range(clip_len)]
+        return [s + i for i in index][::(clip_len // frames)][:frames]
+
+    def _dense_uniform_sampler(self,seq_len, frames, clip_len, s):
+        if seq_len < frames:
+            index = [i for i in range(seq_len)] + [seq_len - 1 for i in range(frames - seq_len)]
+            return [s + i for i in index]
+        if frames <= seq_len <= clip_len:
+            index = [i for i in range(seq_len)]
+            return [s + i for i in index][::(seq_len // frames)][:frames]
+        s = (seq_len - clip_len) // 2
+        index = [i for i in range(clip_len)]
+        return [s + i for i in index][::(clip_len // frames)][:frames]
+import mc
+# TODO: TSNDataSet_Memcache
+'''
+Class Name: TSNDataSet_Memcache
+Description: It's used to load video data from file system according to meta file of dataset.
+'''
+class TSNDataSet_Memcache(data.Dataset):
+    def __init__(self, video_path=None,
+                dataset_type=None,
+                meta_file_name=None,
+                sample_method=None,
+                seg_num_ext=None,
+                mode=None,
+                transform=None,
+                modality=None,
+                img_format=None):
+        ## To initialize parameters
+        self.video_path = video_path
+        self.dataset_type = dataset_type
+        self.meta_file_name = meta_file_name
+        self.sample_method = sample_method
+        self.seg_num_ext = seg_num_ext
+        self.mode = mode
+        self.transform = transform
+        self.modality = modality
+        self.img_format = img_format
+        self.is_memcached = True
+        self.initialized = False
+
+        self.item_list = None
+        self._param_check()     ## Checking parameters
+        self._parse_meta_file() ## Parsing meta file of dataset
+
+    def _init_memcached(self):
+        if not self.initialized:
+            server_list_config_file = \
+                "/mnt/lustre/share/memcached_client/server_list.conf"
+            client_config_file = \
+                "/mnt/lustre/share/memcached_client/client.conf"
+            self.mclient = mc.MemcachedClient.GetInstance(
+                server_list_config_file, client_config_file)
+            self.initialized = True
+        return
+
+    def _pil_loader(self,img_str):
+        buff = io.BytesIO(img_str)
+        with Image.open(buff) as img:
+            img = img.convert('RGB')
+        return [img]
+    def __getitem__(self, index):
+        '''
+        :param index: 'index' is used to load given video
+        :return: index，video data，video label
+        '''
+        video_item = self.item_list[index]
+        if video_item.seq_len < 1:
+            video_item = self.item_list[index+1]
+        img_path = os.path.join(self.video_path, video_item.seq_path)
+        ## To get index by sampler
+        if self.sample_method == 'seg_random':
+             #_index = self._dense_random_sampler(video_item.seq_len, self.seg_num_ext,64, 0)
+            _index = self._seg_random_sampler(video_item.seq_len, self.seg_num_ext, 0)
+        if self.sample_method == 'seg_ratio':
+            # _index = self._dense_uniform_sampler(video_item.seq_len, self.seg_num_ext,64, 0)
+            _index = self._seg_ratio_sampler(video_item.seq_len, self.seg_num_ext, 0, 0.5)
+        ## To get data from file system by index
+        data = []
+        for i in range(self.seg_num_ext):
+            data.extend(self._load_image(img_path, _index[i]))
+        ## Data augmentation
+        data = self.transform(data)
+        # data = data.unsqueeze(0) # TODO:DPFlow
+        # data = data.numpy()
+        return index,data, video_item.seq_id_label
+
+    def __len__(self):
+        return len(self.item_list)
+
+    def get(self, index):
+        return self.__getitem__(index)
+
+    def length(self):
+        return self.__len__()
+
+    def count_video(self):
+        return self.__len__()
+
+    def _load_image(self,img_path,idx):
+        '''
+        :param img_path: The absolute path of frames of videos
+        :param idx: The index of frames
+        :return: The original data of frames
+        '''
+
+
+
+        if self.modality == 'RGB' or self.modality == 'RGBDiff':
+            filename = os.path.join(img_path, self.img_format.format(idx))
+            # memcached
+            if self.is_memcached:
+                self._init_memcached()
+                value = mc.pyvector()
+                self.mclient.Get(filename, value)
+                value_str = mc.ConvertBuffer(value)
+                try:
+                    img = self._pil_loader(value_str)
+                except:  # noqa
+                    raise Exception("Invalid file!", filename)
+            else:
+                img = [Image.open(filename).convert('RGB')]
+            return img
+
+
+            # return [Image.open(os.path.join(img_path, self.img_format.format(idx))).convert('RGB')]
         elif self.modality == 'Flow':
             x_img = Image.open(os.path.join(img_path, self.img_format.format('x', idx))).convert('L')
             y_img = Image.open(os.path.join(img_path, self.img_format.format('y', idx))).convert('L')

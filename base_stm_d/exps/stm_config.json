@@ -1,0 +1,183 @@
+{
+    "GPUS": 8,
+    "USE_SUMMARY": false,
+    "SUPER_LOADER": false,
+    "USE_DISTRIBUTED": true,
+    "USE_SYNC_BN": false,
+    "USE_APEX": false,
+    "KEEP_HISTORY": true,
+    "DEBUG_MODE": false,
+    "EXP_TYPE": "T",
+    "MODEL_NAME": "tsn",
+    "MODEL_LIST": [
+        "tsn",
+        "i3d",
+        "slowfast",
+        "tsm",
+        "mfnet3d"
+    ],
+    "EXP_TAG": "sv2_stm50_RGB_d",
+    "BACKBONE": "stm50",
+    "PRETRAIN_TYPE": "imagenet",
+    "PRETRAIN_TYPE_LIST": [
+        "imagenet",
+        "kinetics"
+    ],
+    "RESUME_TYPE": "resume",
+    "SNAPSHOT_ROOT": "/mnt/lustre/fengjinyuan/data/",
+    "DATASET": {
+        "ROOT_PATH": "",
+        "NAME": "",
+        "CLASS_NUM": 174,
+        "IMG_FORMART": "img_{:05d}.jpg",
+        "VIDEO_SEQ_PATH": "",
+        "TRAIN_META_PATH": "/mnt/lustre/fengjinyuan/data/datasets/somethingv2/somethingv2_rgb_train.txt",
+        "VAL_META_PATH": "/mnt/lustre/fengjinyuan/data/datasets/somethingv2/somethingv2_rgb_val.txt",
+        "TRAIN_SAMPLE_METHOD": "seg_random",
+        "VAL_SAMPLE_METHOD": "seg_ratio",
+        "LOAD_METHOD": "TSNDataSet_Memcache",
+        "LOAD_METHOD_LIST": [
+            "TSNDataSet",
+            "TSNDataSet_Memcache",
+            "DPFlowDataset",
+            "HumanactionDataset",
+            "DPFlowUntrimmedDataset"
+        ]
+    },
+    "TRAIN": {
+        "WARMUP_ITERATION": 10000,
+        "PERIOD_ITERATION": 100000,
+        "MAX_ITERATION": 110000,
+        "LR_STEPS_ITERATION": [
+            40000,
+            80000,
+            100000
+        ],
+        "EPOCHS": 50,
+        "BASE_BATCH_SIZE": 64,
+        "BATCH_SIZE": 8,
+        "BASE_LR": 0.002,
+        "LR_STEP_TYPE": "step",
+        "LR_STEPS": [
+            20,
+            40,
+            60
+        ],
+        "PERIOD_EPOCH": 20,
+        "WARMUP_EPOCH": 10,
+        "MOMENTUM": 0.9,
+        "WEIGHT_DECAY": 0.0005,
+        "CLIP_GRADIENT": 20,
+        "PRINT_FREQ": 10,
+        "EVALUATE_FREQ": 2000,
+        "START_EPOCH": 0,
+        "BEST_PREC": 0.0,
+        "DROPOUT": 0.8,
+        "SEG_NUM": 8,
+        "CROP_NUM": 1,
+        "MODALITY": "RGB",
+        "PARTIAL_BN": true,
+        "IS_SHIFT": true,
+        "SHIFT_DIV": 8,
+        "SHIFT_PLACE": "blockres"
+    },
+    "VAL": {
+        "BATCH_SIZE": 8,
+        "PRINT_FREQ": 10,
+        "SEG_NUM": 8,
+        "CROP_NUM": 1,
+        "MODALITY": "RGB"
+    },
+    "IMG": {
+        "CROP_SIZE": 224,
+        "SCALE_SIZE": 256,
+        "MEAN": 0,
+        "STD": 0
+    },
+    "PRETRAIN_MODEL_DICT": {
+        "tsn": {
+            "stm50": {
+                "imagenet": "resnet50-19c8e357.pth",
+                "resume": "2020_05_08_10:37:50_epoch_6000_NONE_D.pth.tar",
+                "finetune": ""
+            },
+            "BNInception": {
+                "imagenet": "bn_inception-52deb4733.pth",
+                "resume": "",
+                "finetune": ""
+            },
+            "resnet50": {
+                "imagenet": "resnet50-19c8e357.pth",
+                "resume": "",
+                "finetune": ""
+            },
+            "inceptionv3": {
+                "imagenet": "inception_v3_google-1a9a5a14.pth",
+                "resume": "",
+                "finetune": ""
+            }
+        },
+        "i3d": {
+            "resnet50": {
+                "imagenet": "resnet50-19c8e357.pth",
+                "resume": "",
+                "finetune": ""
+            }
+        },
+        "slowfast": {
+            "resnet50": {
+                "imagenet": "resnet50-19c8e357.pth",
+                "resume": "",
+                "finetune": ""
+            }
+        },
+        "tsm": {
+            "resnet50": {
+                "imagenet": "resnet50-19c8e357.pth",
+                "resume": "",
+                "finetune": ""
+            },
+            "BNInception": {
+                "imagenet": "BNInception-9baff57459f5a1744.pth",
+                "kinetics": "BNInceptionKinetics-47f0695e.pth",
+                "resume": "",
+                "finetune": ""
+            },
+            "mobilenetv2": {
+                "imagenet": "mobilenetv2_1.0-f2a8633.pth.tar",
+                "resume": "",
+                "finetune": ""
+            }
+        },
+        "mfnet3d": {
+            "mfnet2d": {
+                "imagenet": "MFNet2D_ImageNet1k-0000.pth",
+                "resume": "",
+                "finetune": ""
+            }
+        }
+    },
+    "REDIS_MODE": false,
+    "REDIS_PATH": "/data/datasets/redis/",
+    "REDIS_DATASET": "kinetics600",
+    "REDIS_LABEL_PKL": "kinetics600_label_to_label_id.pkl",
+    "REDIS_DATASET_CLASS_NUM": 174,
+    "REDIS_TRAIN_SAMPLE_METHOD": "seg_random",
+    "REDIS_VAL_SAMPLE_METHOD": "seg_ratio",
+    "REDIS_TRAIN_SEG_NUM": 8,
+    "REDIS_TRAIN_CROP_NUM": 1,
+    "REDIS_TRAIN_BATCH_SIZE": 8,
+    "REDIS_VAL_SEG_NUM": 8,
+    "REDIS_VAL_CROP_NUM": 1,
+    "REDIS_VAL_BATCH_SIZE": 8,
+    "HUMANACTION_PKL_ROOT_PATH": "/data/humanaction",
+    "HUMANACTION_TRAIN_PKL_NAME": "humanaction_training.pkl",
+    "HUMANACTION_VAL_PKL_NAME": "action_benchmark_s1_attversion.pkl",
+    "HUMANACTION_LABEL_LIST": [
+        "static_action_fall",
+        "static_action_run",
+        "static_action_smoke",
+        "static_action_use_phone",
+        "static_action_watch_phone"
+    ]
+}
